@@ -1,0 +1,323 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --g: #00ff88; --g2: #00cc6a; --gd: #004422;
+    --bg0: #0a0f0a; --bg1: #0f1a0f; --bg2: #162016; --bg3: #1e2e1e;
+    --t1: #e8f5e8; --t2: #a0c8a0; --t3: #5a8a5a;
+    --red: #ff4444; --amber: #ffaa00; --blue: #44aaff;
+    --border: rgba(0,255,136,0.15);
+  }
+  body { background: transparent; font-family: var(--font-mono, monospace); color: var(--t1); }
+  .wrap { padding: 1rem 0; }
+
+  .hdr { text-align: center; padding: 1.5rem 1rem 1rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .hdr-logo { font-size: 11px; color: var(--g); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .hdr h1 { font-size: 20px; font-weight: 500; color: var(--g); margin-bottom: 4px; }
+  .hdr p { font-size: 13px; color: var(--t3); }
+
+  .progress-bar { display: flex; gap: 4px; padding: 0 1rem 1.5rem; overflow-x: auto; }
+  .step-dot { flex: 1; min-width: 0; }
+  .step-dot button {
+    width: 100%; padding: 6px 4px; font-size: 10px; border: 1px solid var(--border);
+    background: var(--bg1); color: var(--t3); cursor: pointer;
+    border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: all 0.2s; font-family: var(--font-mono, monospace);
+  }
+  .step-dot.active button { border-color: var(--g); color: var(--g); background: rgba(0,255,136,0.08); }
+  .step-dot.done button { border-color: var(--g2); color: var(--g2); background: rgba(0,204,106,0.05); }
+
+  .panel { display: none; padding: 0 1rem; animation: fadeIn 0.3s ease; }
+  .panel.visible { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .panel-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 1.2rem; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--g); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--g); flex-shrink: 0; }
+  .panel-hdr h2 { font-size: 16px; font-weight: 500; color: var(--g); }
+
+  .desc { font-size: 13px; color: var(--t2); line-height: 1.7; margin-bottom: 1rem; font-family: var(--font-sans, sans-serif); }
+  .analogy { background: rgba(255,170,0,0.07); border-left: 2px solid var(--amber); border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 1rem; font-size: 13px; color: #ffcc66; font-family: var(--font-sans, sans-serif); line-height: 1.6; }
+  .analogy strong { color: var(--amber); }
+  .warn { background: rgba(255,68,68,0.07); border-left: 2px solid var(--red); border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 1rem; font-size: 12px; color: #ff9999; font-family: var(--font-sans, sans-serif); }
+  .info { background: rgba(68,170,255,0.07); border-left: 2px solid var(--blue); border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 1rem; font-size: 12px; color: #88ccff; font-family: var(--font-sans, sans-serif); }
+
+  .cmd-block { margin-bottom: 10px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .cmd-label { background: var(--bg2); padding: 4px 10px; font-size: 10px; color: var(--t3); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .cmd-label span { color: var(--g); }
+  .copy-btn { background: transparent; border: none; color: var(--t3); cursor: pointer; font-size: 11px; font-family: var(--font-mono, monospace); padding: 2px 6px; border-radius: 3px; transition: all 0.2s; }
+  .copy-btn:hover { color: var(--g); background: rgba(0,255,136,0.1); }
+  .copy-btn.copied { color: var(--g); }
+  pre { background: var(--bg1); padding: 12px; font-size: 12px; color: var(--t1); overflow-x: auto; line-height: 1.6; }
+  .prompt { color: var(--g); }
+  .comment { color: var(--t3); }
+
+  .checks { margin-bottom: 1rem; }
+  .check-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(0,255,136,0.06); font-size: 13px; color: var(--t2); font-family: var(--font-sans, sans-serif); }
+  .check-item:last-child { border-bottom: none; }
+  .check-icon { color: var(--g); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .nav { display: flex; gap: 8px; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .nav button {
+    flex: 1; padding: 9px; border: 1px solid var(--border); background: var(--bg2);
+    color: var(--t2); cursor: pointer; border-radius: 6px; font-size: 13px;
+    font-family: var(--font-mono, monospace); transition: all 0.2s;
+  }
+  .nav .btn-next { border-color: var(--g); color: var(--g); background: rgba(0,255,136,0.08); }
+  .nav button:hover { background: var(--bg3); }
+  .nav .btn-next:hover { background: rgba(0,255,136,0.15); }
+  .nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-right: 4px; }
+  .tag-req { background: rgba(255,68,68,0.15); color: #ff9999; border: 1px solid rgba(255,68,68,0.3); }
+  .tag-opt { background: rgba(68,170,255,0.1); color: #88ccff; border: 1px solid rgba(68,170,255,0.25); }
+  .tag-tool { background: rgba(0,255,136,0.08); color: var(--g2); border: 1px solid var(--border); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+  .mini-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 10px; }
+  .mini-card h3 { font-size: 12px; color: var(--g); margin-bottom: 4px; }
+  .mini-card p { font-size: 11px; color: var(--t3); font-family: var(--font-sans, sans-serif); line-height: 1.5; }
+
+  .finished { text-align: center; padding: 2rem 1rem; }
+  .finished .big { font-size: 36px; margin-bottom: 8px; }
+  .finished h2 { color: var(--g); font-size: 18px; margin-bottom: 8px; }
+  .finished p { color: var(--t2); font-size: 13px; font-family: var(--font-sans); line-height: 1.7; }
+  .next-steps { text-align: left; margin-top: 1.5rem; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
+  .next-steps h3 { color: var(--g); font-size: 13px; margin-bottom: 10px; }
+  .next-step-item { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(0,255,136,0.06); font-size: 12px; color: var(--t2); font-family: var(--font-sans); }
+  .next-step-item:last-child { border-bottom: none; }
+  .arrow { color: var(--g); }
+</style>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="hdr-logo">⬡ Parrot Security OS</div>
+    <h1>Configuración Estilo S4vitar</h1>
+    <p>Parrot OS 7.2 · BSPWM + Polybar + Kitty + ZSH</p>
+  </div>
+
+  <div class="progress-bar" id="progress"></div>
+
+  <div id="panels"></div>
+</div>
+
+<script>
+const steps = [
+  {
+    title: "Actualización",
+    icon: "1",
+    desc: "Lo primero siempre es actualizar el sistema. Esto garantiza que tienes los últimos parches de seguridad y versiones de paquetes. S4vitar siempre empieza aquí.",
+    analogy: "<strong>Analogía:</strong> Imagina que Parrot OS es tu móvil recién sacado de la caja. Antes de instalar apps, lo actualizas. Igual aquí.",
+    warn: "⚠️ Necesitas conexión a internet. Ejecuta estos comandos como root o con sudo.",
+    cmds: [
+      { label: "terminal", code: `<span class='prompt'>❯</span> sudo apt update && sudo apt upgrade -y\n<span class='prompt'>❯</span> sudo apt dist-upgrade -y\n<span class='prompt'>❯</span> sudo apt autoremove -y` },
+      { label: "instalar dependencias base", code: `<span class='prompt'>❯</span> sudo apt install -y build-essential git curl wget vim` }
+    ],
+    checks: ["Sistema actualizado", "Dependencias base instaladas", "Sin errores en la terminal"]
+  },
+  {
+    title: "BSPWM",
+    icon: "2",
+    desc: "BSPWM (Binary Space Partitioning Window Manager) es el gestor de ventanas que usa S4vitar. No tiene barra ni decoraciones: es puro teclado. Las ventanas se dividen como un árbol binario.",
+    analogy: "<strong>Analogía:</strong> En Flutter usas un Widget tree donde cada widget ocupa su espacio. BSPWM hace lo mismo con las ventanas: las divide y organiza como un árbol. Cada ventana es un 'nodo hoja'.",
+    cmds: [
+      { label: "instalar bspwm + sxhkd", code: `<span class='prompt'>❯</span> sudo apt install -y bspwm sxhkd` },
+      { label: "crear directorios de configuración", code: `<span class='prompt'>❯</span> mkdir -p ~/.config/bspwm ~/.config/sxhkd` },
+      { label: "copiar archivos de ejemplo", code: `<span class='prompt'>❯</span> cp /usr/share/doc/bspwm/examples/bspwmrc ~/.config/bspwm/bspwmrc\n<span class='prompt'>❯</span> cp /usr/share/doc/bspwm/examples/sxhkdrc ~/.config/sxhkd/sxhkdrc\n<span class='prompt'>❯</span> chmod +x ~/.config/bspwm/bspwmrc` },
+      { label: "configuración básica bspwmrc (reemplazar contenido)", code: `<span class='prompt'>❯</span> cat > ~/.config/bspwm/bspwmrc << 'EOF'\n#!/bin/bash\nsxhkd &\nbspc monitor -d I II III IV V VI VII VIII IX X\nbspc config border_width    2\nbspc config window_gap      12\nbspc config split_ratio     0.52\nbspc config borderless_monocle true\nbspc config gapless_monocle true\nbspc config focused_border_color "#00ff88"\nbspc config normal_border_color  "#1e2e1e"\nEOF` }
+    ],
+    checks: ["BSPWM instalado", "SXHKD instalado", "Archivos de config creados", "10 escritorios configurados"]
+  },
+  {
+    title: "Kitty",
+    icon: "3",
+    desc: "Kitty es la terminal que usa S4vitar. Es ultrarrápida porque usa la GPU para renderizar. Soporta imágenes, tiene múltiples ventanas dentro de una sola terminal y es muy personalizable.",
+    analogy: "<strong>Analogía:</strong> Si las terminales normales son coches de gasolina, Kitty es eléctrico: más rápido, más limpio, con más features.",
+    info: "ℹ️ Kitty viene preinstalado en Parrot OS. Solo necesitamos configurarlo.",
+    cmds: [
+      { label: "verificar instalación", code: `<span class='prompt'>❯</span> kitty --version` },
+      { label: "si no está instalado", code: `<span class='prompt'>❯</span> sudo apt install -y kitty` },
+      { label: "crear configuración de kitty", code: `<span class='prompt'>❯</span> mkdir -p ~/.config/kitty\n<span class='prompt'>❯</span> cat > ~/.config/kitty/kitty.conf << 'EOF'\nfont_family      FiraCode Nerd Font Mono\nfont_size        11.0\ncursor_shape     beam\ncursor_blink_interval 0\nbackground_opacity 0.90\nwindow_padding_width 8\nforeground #e8f5e8\nbackground #0a0f0a\nselection_background #00ff88\ntab_bar_style powerline\nEOF` }
+    ],
+    checks: ["Kitty funciona", "Config personalizada", "Transparencia activada"]
+  },
+  {
+    title: "ZSH + P10k",
+    icon: "4",
+    desc: "ZSH es la shell que usa S4vitar. Con Powerlevel10k (P10k) obtienes un prompt visual, con info de git, tiempo de ejecución, errores y más. Oh My ZSH es el gestor de plugins.",
+    analogy: "<strong>Analogía:</strong> La terminal por defecto (bash) es como un IDE sin plugins. ZSH + P10k es como VSCode con todas las extensiones: autocompletado, colores, información en tiempo real.",
+    cmds: [
+      { label: "instalar zsh", code: `<span class='prompt'>❯</span> sudo apt install -y zsh\n<span class='prompt'>❯</span> chsh -s $(which zsh)` },
+      { label: "instalar oh-my-zsh", code: `<span class='prompt'>❯</span> sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"` },
+      { label: "instalar powerlevel10k", code: `<span class='prompt'>❯</span> git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \\\n  ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k` },
+      { label: "instalar plugins útiles", code: `<span class='prompt'>❯</span> <span class='comment'># zsh-autosuggestions (sugerencias en gris)</span>\ngit clone https://github.com/zsh-users/zsh-autosuggestions \\\n  ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions\n\n<span class='prompt'>❯</span> <span class='comment'># zsh-syntax-highlighting (colorea comandos)</span>\ngit clone https://github.com/zsh-users/zsh-syntax-highlighting \\\n  ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting` },
+      { label: "configurar .zshrc", code: `<span class='prompt'>❯</span> sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="powerlevel10k\\/powerlevel10k"/' ~/.zshrc\n<span class='prompt'>❯</span> sed -i 's/plugins=(git)/plugins=(git zsh-autosuggestions zsh-syntax-highlighting)/' ~/.zshrc\n<span class='prompt'>❯</span> source ~/.zshrc` }
+    ],
+    checks: ["ZSH como shell por defecto", "Oh My ZSH instalado", "Powerlevel10k activado", "Plugins instalados"]
+  },
+  {
+    title: "Nerd Fonts",
+    icon: "5",
+    desc: "Las Nerd Fonts son fuentes tipográficas especiales que incluyen iconos (flechas, logos, símbolos) usados por Powerlevel10k y Polybar. S4vitar usa Hack Nerd Font o FiraCode.",
+    analogy: "<strong>Analogía:</strong> Es como tener emojis extra en tu teclado, pero para la terminal. Sin ellas, verás cuadrados □ en lugar de iconos bonitos.",
+    cmds: [
+      { label: "crear directorio de fuentes", code: `<span class='prompt'>❯</span> mkdir -p ~/.local/share/fonts && cd ~/.local/share/fonts` },
+      { label: "descargar hack nerd font", code: `<span class='prompt'>❯</span> wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Hack.zip\n<span class='prompt'>❯</span> unzip Hack.zip -d Hack && rm Hack.zip` },
+      { label: "descargar firacode nerd font", code: `<span class='prompt'>❯</span> wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip\n<span class='prompt'>❯</span> unzip FiraCode.zip -d FiraCode && rm FiraCode.zip` },
+      { label: "actualizar cache de fuentes", code: `<span class='prompt'>❯</span> fc-cache -fv\n<span class='prompt'>❯</span> <span class='comment'># Verificar que se instalaron:</span>\n<span class='prompt'>❯</span> fc-list | grep -i "nerd"` }
+    ],
+    checks: ["Hack Nerd Font instalada", "FiraCode Nerd Font instalada", "Cache actualizado", "Iconos visibles en terminal"]
+  },
+  {
+    title: "Picom",
+    icon: "6",
+    desc: "Picom es el compositor. Se encarga de la transparencia de las ventanas, las sombras y los efectos visuales. Sin él, Kitty no tendría transparencia.",
+    analogy: "<strong>Analogía:</strong> Picom es como el motor de renders de Flutter: tú defines que una ventana tenga 90% opacidad, y Picom lo dibuja en pantalla. Sin él, todo es opaco y plano.",
+    cmds: [
+      { label: "instalar picom", code: `<span class='prompt'>❯</span> sudo apt install -y picom` },
+      { label: "crear configuración picom", code: `<span class='prompt'>❯</span> mkdir -p ~/.config/picom\n<span class='prompt'>❯</span> cat > ~/.config/picom/picom.conf << 'EOF'\nbackend = "glx";\nvsync = true;\nopacity-rule = [\n  "90:class_g = 'kitty'",\n  "85:class_g = 'Rofi'"\n];\nblur-method = "dual_kawase";\nblur-strength = 5;\ncorner-radius = 8;\nfading = false;\nEOF` },
+      { label: "arrancar picom con bspwm (añadir al bspwmrc)", code: `<span class='prompt'>❯</span> echo 'picom --config ~/.config/picom/picom.conf &' >> ~/.config/bspwm/bspwmrc` }
+    ],
+    checks: ["Picom instalado", "Config con transparencia", "Iniciado en arranque de BSPWM"]
+  },
+  {
+    title: "Polybar",
+    icon: "7",
+    desc: "Polybar es la barra de estado superior/inferior que ves en todos los setups de S4vitar. Muestra escritorios, hora, batería, red, CPU. Es la 'HUD' del sistema.",
+    analogy: "<strong>Analogía:</strong> Polybar es como la AppBar de Flutter: siempre visible arriba, muestra info del estado actual y tiene widgets personalizables.",
+    cmds: [
+      { label: "instalar polybar", code: `<span class='prompt'>❯</span> sudo apt install -y polybar` },
+      { label: "crear estructura de configuración", code: `<span class='prompt'>❯</span> mkdir -p ~/.config/polybar` },
+      { label: "configuración básica de polybar", code: `<span class='prompt'>❯</span> cat > ~/.config/polybar/config.ini << 'EOF'\n[colors]\nbackground = #0a0f0a\nforeground = #e8f5e8\nprimary    = #00ff88\nwarn       = #ffaa00\nalert      = #ff4444\n\n[bar/main]\nwidth  = 100%\nheight = 28\nbottom = false\nbackground = \${colors.background}\nforeground = \${colors.foreground}\nfont-0 = "FiraCode Nerd Font Mono:size=10;2"\nmodules-left   = bspwm\nmodules-center = date\nmodules-right  = cpu memory wlan\ntray-position  = right\n\n[module/bspwm]\ntype = internal/bspwm\nlabel-focused   = %name%\nlabel-focused-foreground = \${colors.primary}\nlabel-occupied  = %name%\nlabel-empty     = %name%\nlabel-empty-foreground = #444\n\n[module/date]\ntype = internal/date\ninterval = 1\ndate = "%H:%M:%S  %d/%m/%Y"\nlabel-foreground = \${colors.primary}\n\n[module/cpu]\ntype = internal/cpu\ninterval = 2\nlabel = "CPU %percentage%%"\nlabel-foreground = \${colors.foreground}\n\n[module/memory]\ntype = internal/memory\ninterval = 2\nlabel = "RAM %percentage_used%%"\n\n[module/wlan]\ntype = internal/network\ninterface-type = wireless\nlabel-connected = " %essid%"\nlabel-disconnected = "睊 sin red"\nEOF` },
+      { label: "script de lanzamiento", code: `<span class='prompt'>❯</span> cat > ~/.config/polybar/launch.sh << 'EOF'\n#!/bin/bash\nkillall -q polybar\nwhile pgrep -u $UID -x polybar >/dev/null; do sleep 0.5; done\npolybar main 2>&1 | tee -a /tmp/polybar.log &\nEOF\nchmod +x ~/.config/polybar/launch.sh\necho '~/.config/polybar/launch.sh &' >> ~/.config/bspwm/bspwmrc` }
+    ],
+    checks: ["Polybar instalado", "Barra con módulos", "Script de arranque listo"]
+  },
+  {
+    title: "Rofi + atajos",
+    icon: "8",
+    desc: "Rofi es el lanzador de aplicaciones (como Spotlight en macOS). Con sxhkd configuramos atajos de teclado para todo: abrir terminal, cambiar escritorio, cerrar ventanas.",
+    analogy: "<strong>Analogía:</strong> En Android tienes el cajón de apps con un gesto. Rofi hace lo mismo pero con Super+D o Alt+F2, mucho más rápido.",
+    cmds: [
+      { label: "instalar rofi", code: `<span class='prompt'>❯</span> sudo apt install -y rofi` },
+      { label: "configurar atajos en sxhkdrc", code: `<span class='prompt'>❯</span> cat > ~/.config/sxhkd/sxhkdrc << 'EOF'\n# Abrir terminal\nsuper + Return\n  kitty\n\n# Lanzador de apps\nsuper + d\n  rofi -show drun\n\n# Cerrar ventana\nsuper + w\n  bspc node -c\n\n# Cambiar modo ventana (tiled/fullscreen)\nsuper + m\n  bspc node -t fullscreen\n\nsuper + t\n  bspc node -t tiled\n\n# Mover entre escritorios (1-0)\nsuper + {1-9,0}\n  bspc desktop -f '^{1-9,10}'\n\n# Mover ventana a escritorio\nsuper + shift + {1-9,0}\n  bspc node -d '^{1-9,10}' --follow\n\n# Mover foco entre ventanas\nsuper + {Left,Down,Up,Right}\n  bspc node -f {west,south,north,east}\n\n# Recargar sxhkd\nsuper + Escape\n  pkill -USR1 -x sxhkd\nEOF` }
+    ],
+    checks: ["Rofi instalado", "Super+Return abre Kitty", "Super+D abre Rofi", "Atajos de escritorios 1-9"]
+  },
+  {
+    title: "Aliases + Herramientas",
+    icon: "9",
+    desc: "S4vitar usa muchos aliases para agilizar el trabajo. También activamos herramientas de Parrot que vienen preinstaladas. Esta es la parte más orientada a ciberseguridad.",
+    warn: "⚠️ Herramientas como nmap, burpsuite o metasploit solo deben usarse en entornos legales y controlados (CTF, tu propio lab, redes con permiso).",
+    cmds: [
+      { label: "aliases útiles en .zshrc", code: `<span class='prompt'>❯</span> cat >> ~/.zshrc << 'EOF'\n\n# Aliases de sistema\nalias ll='ls -lah --color=auto'\nalias la='ls -la --color=auto'\nalias grep='grep --color=auto'\nalias cls='clear'\nalias ..='cd ..'\nalias ...='cd ../..'\n\n# Aliases de red\nalias myip='curl -s https://ipinfo.io/ip'\nalias ports='ss -tulnp'\nalias ifaces='ip -c a'\n\n# Aliases de seguridad (lab)\nalias scan='sudo nmap -sV -sC'\nalias httpscan='sudo nmap --script=http-enum'\nalias pingsweep='sudo nmap -sn'\n\n# Extraer cualquier archivo\nextract() {\n  case \$1 in\n    *.tar.gz)  tar -xzf \$1   ;;\n    *.zip)     unzip \$1       ;;\n    *.7z)      7z x \$1        ;;\n    *.rar)     unrar x \$1     ;;\n    *)         echo "Formato no soportado" ;;\n  esac\n}\nEOF\nsource ~/.zshrc` },
+      { label: "verificar herramientas preinstaladas", code: `<span class='prompt'>❯</span> which nmap burpsuite metasploit-framework john hashcat 2>/dev/null\n<span class='prompt'>❯</span> <span class='comment'># Si alguna falta:</span>\n<span class='prompt'>❯</span> sudo apt install -y nmap burpsuite john hashcat` },
+      { label: "herramienta extra: bat (mejor que cat)", code: `<span class='prompt'>❯</span> sudo apt install -y bat\n<span class='prompt'>❯</span> echo "alias cat='bat --style=plain'" >> ~/.zshrc` }
+    ],
+    checks: ["Aliases cargados en .zshrc", "Herramientas verificadas", "bat instalado"]
+  },
+  {
+    title: "Finalizado",
+    icon: "✓",
+    desc: "¡Tu entorno estilo S4vitar está listo! Reinicia sesión seleccionando BSPWM en el login screen.",
+    cmds: [
+      { label: "reiniciar sesión gráfica", code: `<span class='prompt'>❯</span> <span class='comment'># Cierra sesión y en el login screen elige BSPWM</span>\n<span class='prompt'>❯</span> sudo systemctl restart display-manager` }
+    ],
+    finished: true
+  }
+];
+
+let current = 0;
+let done = new Set();
+
+function cmd(text) {
+  return text.replace(/<[^>]+>/g,'');
+}
+
+function renderProgress() {
+  const bar = document.getElementById('progress');
+  bar.innerHTML = steps.map((s,i) => `
+    <div class="step-dot ${i===current?'active':done.has(i)?'done':''}" id="dot${i}">
+      <button onclick="goto(${i})" title="${s.title}">${s.icon} ${s.title}</button>
+    </div>`).join('');
+}
+
+function renderPanels() {
+  const container = document.getElementById('panels');
+  container.innerHTML = steps.map((s,i) => `
+    <div class="panel ${i===current?'visible':''}" id="panel${i}">
+      <div class="panel-hdr">
+        <div class="step-num">${s.icon}</div>
+        <h2>${s.title}</h2>
+      </div>
+      ${s.finished ? renderFinished(s) : renderStep(s, i)}
+    </div>`).join('');
+}
+
+function renderStep(s, idx) {
+  let html = '';
+  if(s.desc) html += `<p class="desc">${s.desc}</p>`;
+  if(s.analogy) html += `<div class="analogy">${s.analogy}</div>`;
+  if(s.warn) html += `<div class="warn">${s.warn}</div>`;
+  if(s.info) html += `<div class="info">${s.info}</div>`;
+  if(s.cmds) html += s.cmds.map((c,ci) => `
+    <div class="cmd-block">
+      <div class="cmd-label"><span>$ ${c.label}</span><button class="copy-btn" onclick="copyCmd(this, '${encodeURIComponent(cmd(c.code))}')" aria-label="copiar"><i class="ti ti-copy" aria-hidden="true"></i> copiar</button></div>
+      <pre>${c.code}</pre>
+    </div>`).join('');
+  if(s.checks) html += `<div class="checks">${s.checks.map(c=>`<div class="check-item"><span class="check-icon"><i class="ti ti-circle-check" aria-hidden="true"></i></span>${c}</div>`).join('')}</div>`;
+  html += `<div class="nav">
+    <button ${idx===0?'disabled':''} onclick="goto(${idx-1})">← anterior</button>
+    <button class="btn-next" onclick="advance(${idx})">${idx===steps.length-2?'Finalizar ✓':'siguiente →'}</button>
+  </div>`;
+  return html;
+}
+
+function renderFinished(s) {
+  return `<div class="finished">
+    <div class="big">🎉</div>
+    <h2>¡Entorno configurado!</h2>
+    <p>Tu Parrot OS ahora tiene el setup completo estilo S4vitar.<br>Reinicia la sesión y selecciona <strong>BSPWM</strong> en el gestor de login.</p>
+    <div class="cmd-block" style="margin:1rem 0; text-align:left;">
+      <div class="cmd-label"><span>$ reiniciar sesión</span><button class="copy-btn" onclick="copyCmd(this,'${encodeURIComponent(cmd(s.cmds[0].code))}')" aria-label="copiar"><i class="ti ti-copy" aria-hidden="true"></i> copiar</button></div>
+      <pre>${s.cmds[0].code}</pre>
+    </div>
+    <div class="next-steps">
+      <h3><i class="ti ti-arrow-right" aria-hidden="true"></i> Próximos pasos recomendados</h3>
+      <div class="next-step-item"><span class="arrow">→</span> Practica en plataformas CTF: HackTheBox, TryHackMe</div>
+      <div class="next-step-item"><span class="arrow">→</span> Aprende reconocimiento con nmap y gobuster</div>
+      <div class="next-step-item"><span class="arrow">→</span> Estudia los cursos de S4vitar en YouTube / Twitch</div>
+      <div class="next-step-item"><span class="arrow">→</span> Configura una VPN para HTB: sudo openvpn tu.ovpn</div>
+      <div class="next-step-item"><span class="arrow">→</span> Crea snapshots de tu VM antes de cada práctica</div>
+    </div>
+    <div class="nav" style="margin-top:1rem;">
+      <button onclick="goto(${steps.length-2})">← volver</button>
+      <button class="btn-next" onclick="sendPrompt('¿Qué máquinas de HackTheBox recomiendas para principiantes?') ">Recomiéndame CTFs para empezar ↗</button>
+    </div>
+  </div>`;
+}
+
+function goto(i) {
+  current = i;
+  renderProgress();
+  renderPanels();
+}
+
+function advance(i) {
+  done.add(i);
+  current = i + 1;
+  renderProgress();
+  renderPanels();
+}
+
+function copyCmd(btn, encoded) {
+  const text = decodeURIComponent(encoded).replace(/\s*#.*$/gm,'').replace(/\\\n\s*/g,' ').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> copiado';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = '<i class="ti ti-copy" aria-hidden="true"></i> copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+renderProgress();
+renderPanels();
+</script>
